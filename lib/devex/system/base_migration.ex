@@ -5,68 +5,34 @@ defmodule Devex.System.BaseMigration do
 
   use Ecto.Migration
 
-  defp add_default_create_table_fields(table_name, quoted_create_table_expression) do
+  @doc """
+  Used in a migration file. Creates a table with the given name. The provided expression is executed in the `create table` clause.
+  """
+  @spec create_table_with_default_fields(atom | String.t(), any) :: any
+  defmacro create_table_with_default_fields(table_name, do: quoted_create_table_expression) do
     quote do
-      create table(unquote(table_name), primary_key: false) do
+      unquoted_table_name = unquote(table_name)
+
+      create table(unquoted_table_name, primary_key: false) do
         add(:id, :bigint, primary_key: true)
         add(:created_by, references(:sys_user))
         add(:updated_by, references(:sys_user))
-
 
         unquote(quoted_create_table_expression)
 
         timestamps(inserted_at: :created_at, type: :timestamptz)
       end
+
+      create(index(unquoted_table_name, [:created_at]))
+      create(index(unquoted_table_name, [:created_by]))
+      create(index(unquoted_table_name, [:updated_at]))
+      create(index(unquoted_table_name, [:updated_by]))
+
+      flush()
+
+      execute("""
+      ALTER TABLE #{unquoted_table_name} ALTER COLUMN id SET DEFAULT next_id()
+      """)
     end
-
-    create(index(table_name, [:created_at]))
-    create(index(table_name, [:created_by]))
-    create(index(table_name, [:updated_at]))
-    create(index(table_name, [:updated_by]))
-
-    flush()
-
-    execute("""
-    ALTER TABLE #{table_name} ALTER COLUMN id SET DEFAULT next_id()
-    """)
   end
-
-  # @spec add_default_create_table_fields_macro(atom | String.t(), [
-  #         %{name: atom | String.t(), type: any, opts: any}
-  #       ]) :: any
-  @doc """
-  Used in a migration file. Creates a table with a specified name + column attributes.
-  """
-  defmacro macro_add_default_create_table_fields(table_name, do: create_table_expression) do
-    add_default_create_table_fields(table_name, create_table_expression)
-  end
-
-  # def migration_table_fields(table_name, fields \\ []) do
-  #   create table(table_name, primary_key: false) do
-  #     add(:id, :bigint, primary_key: true)
-  #     add(:created_by, references(:sys_user))
-  #     add(:updated_by, references(:sys_user))
-  #     # add :other_schema_id, references(:other_schema, type: :bigint)
-
-  #     for field <- fields do
-  #       case field[:opts] do
-  #         nil -> add(field.name, field.type)
-  #         _   -> add(field.name, field.type, field[:opts])
-  #       end
-  #     end
-
-  #     timestamps(inserted_at: :created_at, type: :timestamptz)
-  #   end
-
-  #   create(index(table_name, [:created_at]))
-  #   create(index(table_name, [:created_by]))
-  #   create(index(table_name, [:updated_at]))
-  #   create(index(table_name, [:updated_by]))
-
-  #   flush()
-
-  #   execute("""
-  #   ALTER TABLE #{table_name} ALTER COLUMN id SET DEFAULT next_id()
-  #   """)
-  # end
 end
