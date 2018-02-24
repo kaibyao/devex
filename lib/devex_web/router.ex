@@ -18,7 +18,7 @@ defmodule DevexWeb.Router do
 
     scope "/rest", Rest, as: :rest do
       scope "/table", Table, as: :table do
-        resources "/v1/:table_name", V1Controller
+        resources("/v1/:table_name", V1Controller, except: [:new, :edit])
       end
     end
   end
@@ -34,9 +34,4 @@ defmodule DevexWeb.Router do
 
     # resources("/users", UserController, only: [:index, :show])
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", DevexWeb do
-  #   pipe_through :api
-  # end
 end

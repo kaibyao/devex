@@ -20,7 +20,11 @@ defmodule Devex.System.BaseMigration do
 
         unquote(quoted_create_table_expression)
 
-        timestamps(inserted_at: :created_at, type: :timestamptz)
+        timestamps(
+          inserted_at: :created_at,
+          type: :timestamptz,
+          default: fragment("CURRENT_TIMESTAMP")
+        )
       end
 
       create(index(unquoted_table_name, [:created_at]))

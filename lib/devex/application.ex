@@ -11,7 +11,7 @@ defmodule Devex.Application do
       # Start the Ecto repository
       supervisor(Devex.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(DevexWeb.Endpoint, []),
+      supervisor(DevexWeb.Endpoint, [])
       # Start your own worker by calling: Devex.Worker.start_link(arg1, arg2, arg3)
       # worker(Devex.Worker, [arg1, arg2, arg3]),
     ]
